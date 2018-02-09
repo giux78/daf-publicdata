@@ -4,8 +4,7 @@ import React from 'react';
 import UserStoryGraph from '../components/UserStory/sections/UserStoryGraph';
 import UserStoryHeader from '../components/UserStory/sections/UserStoryHeader';
 import UserStoryImage from '../components/UserStory/sections/UserStoryImage';
-
-import UserStoriesContent from '../components/UserStory/UserStoriesContent';
+import { getCookie } from '../services/FunctionalCookies'
 
 // SERVICES
 import UserStoryService from '../services/UserStoryService';
@@ -19,13 +18,17 @@ class UserStoryView extends React.Component {
   constructor(props) {
     super(props);
     this.init(props);
+    
   }
 
   init(props) {
 
+    var dataportalCookie = getCookie("dataportal"); 
+    var loggedName = dataportalCookie.split('/')[0]
     //init state
-    this.state={
-      id: props.match.params.id
+    this.state = {
+      id: props.match.params.id,
+      loggedName: loggedName
     };
 
     //bind functions
@@ -43,20 +46,20 @@ class UserStoryView extends React.Component {
       });
     });
 
-  /*   userStoryService.getCommunity().then((story) => {
-      this.setState({
-        userStoriesCommunity: story
-      });
-    }); */
-    
+    /*   userStoryService.getCommunity().then((story) => {
+        this.setState({
+          userStoriesCommunity: story
+        });
+      }); */
+
     //INIT DISQUS
-    
+
     var d = document;
     var sConfig = d.createElement('script');
-    sConfig.onload = function() {
+    sConfig.onload = function () {
       disqus_config = function () {
-        this.page.url =  window.location.href ;
-        this.page.identifier = 'user_story_' + props.match.params.id 
+        this.page.url = window.location.href;
+        this.page.identifier = 'user_story_' + props.match.params.id
       }
     };
 
@@ -87,11 +90,7 @@ class UserStoryView extends React.Component {
 
           <div className="u-layout-wide u-layoutCenter u-layout-withGutter u-padding-r-top u-padding-bottom-xxl">
             <div className="Grid Grid--withGutter">
-              <div className="Grid-cell u-md-size8of12 u-lg-size8of12 u-padding-right-xl">
-
-
-
-
+              <div className="Grid-cell u-md-size11of12 u-lg-size11of12 u-padding-right-xl">
                 <div className="row user-story-view">
                   <div>
 
@@ -99,31 +98,64 @@ class UserStoryView extends React.Component {
                       this.state.story &&
                       <div>
                         <UserStoryHeader story={this.state.story} />
-                      
-                        <div className="body">
-                          <UserStoryImage story={this.state.story} graph={1}/>
-                          <div className="u-margin-r-top u-padding-r-top" dangerouslySetInnerHTML={{ __html: this.state.story.text }}></div>
-                          <UserStoryImage story={this.state.story} graph={2}/>
-                          <div className="footer" dangerouslySetInnerHTML={{ __html: this.state.story.footer }}></div>
-                        </div>
+
+                        
+                          {this.state.loggedName ?
+                            <div className="body">
+                              <UserStoryGraph graph={this.state.story.graph1} />
+                              <div className="u-margin-r-top u-padding-r-top" dangerouslySetInnerHTML={{ __html: this.state.story.text }}></div>
+                              <UserStoryGraph graph={this.state.story.graph2} />
+                              <div className="footer" dangerouslySetInnerHTML={{ __html: this.state.story.footer }}></div>
+                            </div>
+                            :
+                            <div className="body">
+                              <UserStoryImage story={this.state.story} graph={1} />
+                              <div className="u-margin-r-top u-padding-r-top" dangerouslySetInnerHTML={{ __html: this.state.story.text }}></div>
+                              <UserStoryImage story={this.state.story} graph={2} />
+                              <div className="footer" dangerouslySetInnerHTML={{ __html: this.state.story.footer }}></div> 
+                            </div>
+                        }
 
                         {/* SHARE */}
                         <div className="share">
                           <ul className="Footer-socialIcons">
                             <li>
-                              <a href="">
+                              <a href={
+                                'http://www.facebook.com/sharer.php?s=100'
+                                + '&p[title]=' + encodeURIComponent('DAF - Data & Analytics Framework')
+                                + '&p[url]=' + encodeURIComponent('https://dataportal.daf.teamdigitale.it')
+                                + '&p[summary]=' + encodeURIComponent('Il framework dei dati pubblici del Paese')
+                              }>
                                 <span className="Icon Icon-facebook u-background-white"></span>
                                 <span className="u-hiddenVisually">Facebook</span>
                               </a>
                             </li>
                             <li>
-                              <a href="">
+                              <a href={
+                                'https://twitter.com/intent/tweet?text='
+                                + encodeURIComponent('DAF - Data & Analytics Framework\n')
+                                + encodeURIComponent('https://dataportal.daf.teamdigitale.it')
+                              }>
                                 <span className="Icon Icon-twitter u-background-white"></span>
                                 <span className="u-hiddenVisually">Twitter</span>
                               </a>
                             </li>
                             <li>
-                              <a href=""><span className="Icon Icon-youtube u-background-white"></span><span className="u-hiddenVisually">Youtube</span></a>
+                              <a href={
+                                'https://www.linkedin.com/shareArticle?'
+                                + '&mini=true'
+                                + '&title=' + encodeURIComponent('DAF - Data & Analytics Framework')
+                                + '&url=' + encodeURIComponent('https://dataportal.daf.teamdigitale.it')
+                                + '&summary=' + encodeURIComponent('Il framework dei dati pubblici del Paese')
+                              }>
+                                <span className="Icon Icon-linkedin u-background-white"></span><span className="u-hiddenVisually">LinkedIn</span></a>
+                            </li>
+                            <li>
+                              <a href={
+                                'https://plus.google.com/share?'
+                                + 'url=' + encodeURIComponent('https://dataportal.daf.teamdigitale.it')
+                              }>
+                                <span className="Icon Icon-googleplus u-background-white"></span><span className="u-hiddenVisually">Google Plus</span></a>
                             </li>
                           </ul>
                         </div>
@@ -136,8 +168,6 @@ class UserStoryView extends React.Component {
 
 
 
-                    {/* <UserStoriesContent subtitle=" " title="Storie dalla community" userStories={this.state.userStoriesCommunity} >
-            </UserStoriesContent> */}
 
                   </div>
                 </div>
@@ -145,16 +175,7 @@ class UserStoryView extends React.Component {
 
 
               </div>
-              <div className="Grid-cell u-sizeFull u-md-size4of12 u-lg-size4of12">
 
-                <article className="u-padding-all-l u-background-white u-lineHeight-l u-text-r-s u-textSecondary u-margin-bottom-l Prose-blockquote">
-                  <UserStoriesContent subtitle=" " title="Storie simili" userStories={this.state.userStoriesSimili} userStoryView="true">
-                  </UserStoriesContent>
-                </article>
-
-
-
-              </div>
             </div>
           </div>
 
@@ -162,8 +183,8 @@ class UserStoryView extends React.Component {
 
 
       </div>
-        
-      );
+
+    );
   }
 }
 
